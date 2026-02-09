@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HouseSearchRequest;
 use App\Models\House;
+use Illuminate\Support\Facades\Cache;
 class HouseController extends Controller
 {
     public function index(HouseSearchRequest $request)
@@ -12,40 +13,51 @@ class HouseController extends Controller
         $filters = $request->validated();
         $perPage = (int) ($filters['per_page'] ?? 20);
 
-        $query = House::query();
+        $cacheKey = $this->cacheKey($filters);
+        $payload = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($filters, $perPage) {
+            $query = House::query();
 
-        if (!empty($filters['name'])) {
-            $name = $filters['name'];
-            $query->where('name', 'like', "%{$name}%");
-        }
-
-        foreach (['bedrooms', 'bathrooms', 'storeys', 'garages'] as $field) {
-            if (array_key_exists($field, $filters) && $filters[$field] !== null) {
-                $query->where($field, (int) $filters[$field]);
+            if (!empty($filters['name'])) {
+                $name = $filters['name'];
+                $query->where('name', 'like', "%{$name}%");
             }
-        }
 
-        $priceFrom = $filters['price_from'] ?? null;
-        $priceTo = $filters['price_to'] ?? null;
+            foreach (['bedrooms', 'bathrooms', 'storeys', 'garages'] as $field) {
+                if (array_key_exists($field, $filters) && $filters[$field] !== null) {
+                    $query->where($field, (int) $filters[$field]);
+                }
+            }
 
-        if ($priceFrom !== null && $priceTo !== null) {
-            $query->whereBetween('price', [(int) $priceFrom, (int) $priceTo]);
-        } elseif ($priceFrom !== null) {
-            $query->where('price', '>=', (int) $priceFrom);
-        } elseif ($priceTo !== null) {
-            $query->where('price', '<=', (int) $priceTo);
-        }
+            $priceFrom = $filters['price_from'] ?? null;
+            $priceTo = $filters['price_to'] ?? null;
 
-        $paginator = $query->paginate($perPage);
+            if ($priceFrom !== null && $priceTo !== null) {
+                $query->whereBetween('price', [(int) $priceFrom, (int) $priceTo]);
+            } elseif ($priceFrom !== null) {
+                $query->where('price', '>=', (int) $priceFrom);
+            } elseif ($priceTo !== null) {
+                $query->where('price', '<=', (int) $priceTo);
+            }
 
-        return response()->json([
-            'data' => $paginator->items(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+            $paginator = $query->paginate($perPage);
+
+            return [
+                'data' => $paginator->items(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ];
+        });
+
+        return response()->json($payload);
+    }
+
+    private function cacheKey(array $filters): string
+    {
+        ksort($filters);
+        return 'houses:search:' . sha1(json_encode($filters));
     }
 }
