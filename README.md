@@ -152,3 +152,11 @@ Stop services:
 ```bash
 docker compose down
 ```
+
+## Database
+
+Run migrations and seed data:
+
+```bash
+php artisan migrate --seed
+```
