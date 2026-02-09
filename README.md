@@ -1,3 +1,8 @@
+- Dev: uzenov.ilyas@gmail.com
+- WebSite: uzenov.dev
+- Location: Kyrgyzstan, Bishkek
+
+
 # PHP Developer Test
 
 ## Background
