@@ -165,3 +165,100 @@ Run migrations and seed data:
 ```bash
 php artisan migrate --seed
 ```
+
+## Setup
+
+Copy env and generate key:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Install dependencies:
+
+```bash
+composer install
+npm install
+```
+
+## Run
+
+Start backend:
+
+```bash
+php artisan serve
+```
+
+Start frontend:
+
+```bash
+npm run dev
+```
+
+## API
+
+Search endpoint:
+
+```bash
+GET /api/houses
+```
+
+Query params:
+
+```text
+name
+bedrooms
+bathrooms
+storeys
+garages
+price_from
+price_to
+page
+per_page
+```
+
+Example:
+
+```bash
+curl "http://127.0.0.1:8000/api/houses?name=Vic&bedrooms=4&price_from=300000&price_to=600000"
+```
+
+## Search Drivers
+
+Database search (default):
+
+```env
+SEARCH_DRIVER=database
+```
+
+Elasticsearch search:
+
+```env
+SEARCH_DRIVER=elasticsearch
+ELASTICSEARCH_HOST=http://localhost:9200
+ELASTICSEARCH_INDEX=houses
+```
+
+Reindex:
+
+```bash
+php artisan houses:reindex
+```
+
+## Redis Cache
+
+Cache store:
+
+```env
+CACHE_STORE=redis
+REDIS_CLIENT=phpredis
+```
+
+## Frontend
+
+Open:
+
+```text
+http://127.0.0.1:8000
+```
