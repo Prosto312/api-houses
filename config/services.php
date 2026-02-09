@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'search' => [
+        'driver' => env('SEARCH_DRIVER', 'database'),
+        'elasticsearch_host' => env('ELASTICSEARCH_HOST', 'http://localhost:9200'),
+        'elasticsearch_index' => env('ELASTICSEARCH_INDEX', 'houses'),
+    ],
+
 ];
