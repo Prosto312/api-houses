@@ -133,3 +133,22 @@ Example:
 
 ---
 
+## Docker
+
+Start services:
+
+```bash
+docker compose up -d
+```
+
+Start services with Kibana:
+
+```bash
+docker compose --profile kibana up -d
+```
+
+Stop services:
+
+```bash
+docker compose down
+```
